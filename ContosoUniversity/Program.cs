@@ -6,9 +6,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SchoolContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-var app = builder.Build();
 
+var app = builder.Build();
+//var host = builder.Build();
+using(var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<SchoolContext>();
+    context.Database.EnsureCreated();
+    DbInitializer.Initialize(context);
+}
+//host.Run();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
